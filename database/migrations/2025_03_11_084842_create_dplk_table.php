@@ -11,13 +11,23 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('dplk', function (Blueprint $table) {
-            $table->id();
+        Schema::create('dplks', function (Blueprint $table) {
+            $table->foreignId('id')
+                  ->constrained('nasabahs')
+                  ->onDelete('cascade')
+                  ->primary();
+
             $table->bigInteger('jumlah_peserta');
             $table->decimal('akumulasi_iuran', 15, 2); // Plafond
             $table->decimal('akumulasi_pengembangan', 15, 2); // Plafond
             $table->decimal('total_saldo', 15, 2); // Plafond
             $table->timestamps();
+
+            $table->unsignedBigInteger('user_id'); 
+            $table->foreign('user_id') 
+                  ->references('id') 
+                  ->on('users') 
+                  ->onDelete('cascade');
         });
     }
 
@@ -26,6 +36,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('dplk');
+        Schema::table('dplks', function (Blueprint $table) {
+            $table->dropForeign(['user_id']);
+        });
+        Schema::dropIfExists('dplks');
     }
 };

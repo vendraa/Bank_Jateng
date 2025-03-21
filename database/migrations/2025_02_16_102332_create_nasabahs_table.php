@@ -20,6 +20,12 @@ return new class extends Migration
             $table->string('key_person');
             $table->string('phone_number',20);
             $table->timestamps();
+
+            $table->unsignedBigInteger('user_id'); 
+            $table->foreign('user_id') 
+                  ->references('id') 
+                  ->on('users') 
+                  ->onDelete('cascade');
         });
     }
 
@@ -28,6 +34,9 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::table('nasabahs', function (Blueprint $table) {
+            $table->dropForeign(['user_id']);
+        });
         Schema::dropIfExists('nasabahs');
     }
 };

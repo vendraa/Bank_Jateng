@@ -11,12 +11,22 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('employee_payroll', function (Blueprint $table) {
-            $table->id();
+        Schema::create('employee_payrolls', function (Blueprint $table) {
+            $table->foreignId('id')
+                  ->constrained('nasabahs')
+                  ->onDelete('cascade')
+                  ->primary();
+
             $table->string('payroll_bank');
             $table->bigInteger('NoA');
-            $table->decimal('nominal_payroll', 15, 2); // Plafond
+            $table->decimal('nominal_payroll', 15, 2); 
             $table->timestamps();
+
+            $table->unsignedBigInteger('user_id'); 
+            $table->foreign('user_id') 
+                  ->references('id') 
+                  ->on('users') 
+                  ->onDelete('cascade');
         });
     }
 
@@ -25,6 +35,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('employee_payroll');
+        Schema::table('employee_payrolls', function (Blueprint $table) {
+            $table->dropForeign(['user_id']);
+        });
+        Schema::dropIfExists('employee_payrolls');
     }
 };

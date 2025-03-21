@@ -12,7 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('bank_accounts', function (Blueprint $table) {
-            $table->id();
+            $table->foreignId('id')
+                  ->constrained('nasabahs')
+                  ->onDelete('cascade')
+                  ->primary();
+
             $table->string('nama_bank');
             $table->string('rekening');
             $table->decimal('saldo', 15, 2);
@@ -20,6 +24,12 @@ return new class extends Migration
             $table->date('posisi');
             $table->integer('mobile_banking');
             $table->timestamps();
+
+            $table->unsignedBigInteger('user_id'); 
+            $table->foreign('user_id') 
+                  ->references('id') 
+                  ->on('users') 
+                  ->onDelete('cascade');
         });
     }
 
@@ -28,6 +38,9 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::table('bank_accounts', function (Blueprint $table) {
+            $table->dropForeign(['user_id']);
+        });
         Schema::dropIfExists('bank_accounts');
     }
 };

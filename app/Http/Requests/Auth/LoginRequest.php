@@ -44,16 +44,14 @@ class LoginRequest extends FormRequest
         $login = $this->input('login');
         $password = $this->input('password');
     
-        $loginField = filter_var($login, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
-    
-        if (!Auth::attempt([$loginField => $login, 'password' => $password], $this->boolean('remember'))) {
+        if (!Auth::attempt(['username' => $login, 'password' => $password], $this->boolean('remember'))) {
             throw ValidationException::withMessages([
                 'login' => __('The provided credentials do not match our records.'),
             ]);
         }
     
         RateLimiter::clear($this->throttleKey());
-    }
+    }    
 
     /**
      * Ensure the login request is not rate limited.

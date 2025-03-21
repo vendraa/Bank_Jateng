@@ -12,10 +12,20 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('product_holdings', function (Blueprint $table) {
-            $table->id();
+            $table->foreignId('id')
+                  ->constrained('nasabahs')
+                  ->onDelete('cascade')
+                  ->primary();
+
             $table->string('nama_produk');
             $table->string('status')->default(false);
             $table->timestamps();
+
+            $table->unsignedBigInteger('user_id'); 
+            $table->foreign('user_id') 
+                  ->references('id') 
+                  ->on('users') 
+                  ->onDelete('cascade');
         });
     }
 
@@ -24,6 +34,9 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::table('product_holdings', function (Blueprint $table) {
+            $table->dropForeign(['user_id']);
+        });
         Schema::dropIfExists('product_holdings');
     }
 };
