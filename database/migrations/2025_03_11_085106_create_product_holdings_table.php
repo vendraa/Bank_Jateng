@@ -12,10 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('product_holdings', function (Blueprint $table) {
-            $table->foreignId('id')
+            $table->id(); 
+            $table->foreignId('nasabah_id')
                   ->constrained('nasabahs')
-                  ->onDelete('cascade')
-                  ->primary();
+                  ->onDelete('cascade');
 
             $table->string('nama_produk');
             $table->string('status')->default(false);
@@ -35,7 +35,10 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('product_holdings', function (Blueprint $table) {
-            $table->dropForeign(['user_id']);
+            $table->dropForeign(['nasabah_id']); 
+        });
+        Schema::table('product_holdings', function (Blueprint $table) {
+            $table->dropForeign(['user_id']); 
         });
         Schema::dropIfExists('product_holdings');
     }

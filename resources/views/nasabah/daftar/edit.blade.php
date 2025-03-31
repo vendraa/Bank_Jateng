@@ -4,10 +4,10 @@
 
 <div class="pagetitle">
     <h1>Edit Data Nasabah</h1>
-    <nav>
+    <nav style="--bs-breadcrumb-divider: '|';">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Home</a></li>
-            <li class="breadcrumb-item"><a href="{{ route('index') }}">Nasabah</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('nasabah.index') }}">Daftar Nasabah</a></li>
             <li class="breadcrumb-item active">Edit</li>
         </ol>
     </nav>
@@ -97,11 +97,11 @@
                             </div>
                         </div>
 
-                        <div>
+                        <div class="d-flex justify-content-end gap-2 mt-4">
                             <button type="submit" class="btn btn-primary">Save</button>
-                            <a href="{{ route('index') }}" class="btn btn-danger">Cancel</a>
+                            <a href="{{ route('nasabah.index') }}" class="btn btn-secondary">Cancel</a>
                         </div>
-                    </form><!-- End Form Edit Nasabah -->
+                    </form>>
 
                 </div>
             </div>

@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Nasabah;
 
-use App\Http\Controllers\Controller;
 use App\Models\Nasabah;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\QueryException;
 
 class DataNasabahController extends Controller
 {
@@ -24,13 +26,29 @@ class DataNasabahController extends Controller
             'phone_number' => 'required|string|max:20',
         ]);
     
-        Nasabah::create($request->all());
-    
-        if ($request->has('create_another')) {
-            return redirect()->route('create')->with('success', 'Data berhasil disimpan. Tambahkan nasabah baru.');
+        try {
+            Nasabah::create([
+                'name'              => $request->name,
+                'npwp'              => $request->npwp,
+                'address'           => $request->address,
+                'business_sector'   => $request->business_sector,
+                'key_person'        => $request->key_person,
+                'phone_number'      => $request->phone_number,
+                'user_id'           => Auth::id(),
+            ]);
+        } catch (QueryException $e) {
+            if ($e->getCode() === '23000') { // Integrity constraint violation
+                return redirect()->back()
+                    ->withInput()
+                    ->withErrors(['npwp' => 'NPWP sudah terdaftar. Silakan gunakan NPWP lain.']);
+            }
+            throw $e; // lemparkan error lain
         }
     
-        return redirect()->route('index')->with('success', 'Data berhasil disimpan.');
-    }
+        if ($request->has('create_another')) {
+            return redirect()->route('nasabah.create')->with('success', 'Data berhasil disimpan. Tambahkan nasabah baru.');
+        }
     
+        return redirect()->route('nasabah.index')->with('success', 'Data berhasil disimpan.');
+    }
 }

@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Nasabah;
 
-use App\Http\Controllers\Controller;
 use App\Models\Nasabah;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\QueryException;
 
 class DaftarNasabahController extends Controller
 {
@@ -15,7 +17,6 @@ class DaftarNasabahController extends Controller
         return view('nasabah.daftar.index', compact('daftarNasabah'));
     }
 
-    // Menampilkan form edit dengan data nasabah
     public function edit($id)
     {
         $nasabah = Nasabah::findOrFail($id);
@@ -23,7 +24,6 @@ class DaftarNasabahController extends Controller
         return view('nasabah.daftar.edit', compact('nasabah'));
     }
 
-    // Menyimpan perubahan data nasabah
     public function update(Request $request, $id)
     {
         $request->validate([
@@ -34,13 +34,41 @@ class DaftarNasabahController extends Controller
             'key_person' => 'required|string|max:255',
             'phone_number' => 'required|string|max:20',
         ]);
-
+    
         $nasabah = Nasabah::findOrFail($id);
+    
+        try {
+            $nasabah->update([
+                'name'              => $request->name,
+                'npwp'              => $request->npwp,
+                'address'           => $request->address,
+                'business_sector'   => $request->business_sector,
+                'key_person'        => $request->key_person,
+                'phone_number'      => $request->phone_number,
+                'user_id'           => Auth::id(),
+            ]);
+        } catch (QueryException $e) {
+            if ($e->getCode() === '23000') {
+                return redirect()->back()
+                    ->withInput()
+                    ->withErrors(['npwp' => 'NPWP sudah terdaftar. Silakan gunakan NPWP lain.']);
+            }
+            throw $e;
+        }
+    
+        return redirect()->route('nasabah.index')->with('success', 'Data Nasabah berhasil diperbarui.');
+    }
+    
+    public function destroy($id)
+{
+    $nasabah = Nasabah::findOrFail($id);
 
-        // Update data nasabah
-        $nasabah->update($request->all());
-
-        return redirect()->route('index')->with('success', 'Data Nasabah berhasil diperbarui.');
+    try {
+        $nasabah->delete();
+        return redirect()->route('nasabah.index')->with('phr_success', 'Data nasabah berhasil dihapus.');
+    } catch (\Exception $e) {
+        return redirect()->route('nasabah.index')->with('error', 'Gagal menghapus data nasabah.');
     }
 }
 
+}

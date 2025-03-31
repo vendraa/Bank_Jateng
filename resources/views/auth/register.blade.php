@@ -65,13 +65,6 @@
                       @enderror
                     </div>
                     <div class="col-12">
-                      <label for="email" class="form-label">Email</label>
-                      <input id="email" class="form-control @error('email') is-invalid @enderror" type="email" name="email" value="{{ old('email') }}" required placeholder="Enter your email">
-                      @error('email')
-                      <div class="invalid-feedback">{{ $message }}</div>
-                      @enderror
-                    </div>
-                    <div class="col-12">
                       <label for="password" class="form-label">Password</label>
                       <input id="password" class="form-control @error('password') is-invalid @enderror" type="password" name="password" required placeholder="Enter password">
                       @error('password')

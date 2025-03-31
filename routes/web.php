@@ -1,39 +1,37 @@
 <?php
 
-use App\Http\Controllers\Nasabah\DaftarNasabahController;
-use App\Http\Controllers\Nasabah\DataNasabahController;
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PHRController;
 use App\Http\Controllers\ProfileController;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Nasabah\DataNasabahController;
+use App\Http\Controllers\Nasabah\DaftarNasabahController;
 
 Route::get('/', function () {
     return view('auth.login');
-});
+})->name('login');
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-Route::get('/data-nasabah', [DataNasabahController::class, 'create'])->name('create');
-Route::post('/data-nasabah', [DataNasabahController::class, 'store'])->name('store');
+    Route::get('/data-nasabah', [DataNasabahController::class, 'create'])->name('nasabah.create');
+    Route::post('/data-nasabah', [DataNasabahController::class, 'store'])->name('nasabah.store');
 
-Route::get('/daftar-nasabah', [DaftarNasabahController::class, 'index'])->name('index');
+    Route::get('/daftar-nasabah', [DaftarNasabahController::class, 'index'])->name('nasabah.index');
+    Route::get('/daftar-nasabah/edit/{id}', [DaftarNasabahController::class, 'edit'])->name('nasabah.edit');
+    Route::put('/daftar-nasabah/update/{id}', [DaftarNasabahController::class, 'update'])->name('nasabah.update');
+    Route::delete('/daftar-nasabah/delete/{id}', [DaftarNasabahController::class, 'destroy'])->name('nasabah.destroy');
 
-// Route untuk menampilkan form edit
-Route::get('/daftar-nasabah/edit/{id}', [DaftarNasabahController::class, 'edit'])->name('nasabah.edit');
 
-// Route untuk update data nasabah
-Route::put('/daftar-nasabah/update/{id}', [DaftarNasabahController::class, 'update'])->name('nasabah.update');
+    Route::get('/phr-nasabah', [PHRController::class, 'index'])->name('phr.index');
+    Route::get('/phr/output/{nasabah}', [PhrController::class, 'showOutput'])->name('phr.output.show');
+    Route::get('/phr-nasabah/create/{nasabah}', [PHRController::class, 'create'])->name('phr.create');
+    Route::post('/phr-nasabah/create', [PHRController::class, 'store'])->name('phr.store');
 
-// Route untuk delete nasabah
-Route::delete('/daftar-nasabah/delete/{id}', [DaftarNasabahController::class, 'destroy'])->name('nasabah.destroy');
-
-Route::get('/phr-nasabah', [PHRController::class, 'index'])->name('phr.index');
-
-Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::patch('/profile/{id}', [ProfileController::class, 'update'])->name('profile.update');
+    Route::post('/profile/update-password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.delete');
 });
 
 require __DIR__.'/auth.php';

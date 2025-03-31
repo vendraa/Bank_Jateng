@@ -12,15 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('dplks', function (Blueprint $table) {
-            $table->foreignId('id')
+            $table->id(); 
+            $table->foreignId('nasabah_id')
                   ->constrained('nasabahs')
-                  ->onDelete('cascade')
-                  ->primary();
+                  ->onDelete('cascade');
 
             $table->bigInteger('jumlah_peserta');
             $table->decimal('akumulasi_iuran', 15, 2); // Plafond
             $table->decimal('akumulasi_pengembangan', 15, 2); // Plafond
-            $table->decimal('total_saldo', 15, 2); // Plafond
             $table->timestamps();
 
             $table->unsignedBigInteger('user_id'); 
@@ -37,7 +36,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('dplks', function (Blueprint $table) {
-            $table->dropForeign(['user_id']);
+            $table->dropForeign(['nasabah_id']); 
+            $table->dropForeign(['user_id']); 
         });
         Schema::dropIfExists('dplks');
     }

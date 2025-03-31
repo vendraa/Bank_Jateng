@@ -30,6 +30,7 @@
 </head>
 
 <body>
+
   <main>
     <div class="container">
       <section class="section register min-vh-100 d-flex flex-column align-items-center justify-content-center py-4">
@@ -51,9 +52,9 @@
                   <form method="POST" action="{{ route('login') }}" class="row g-3 needs-validation" novalidate>
                     @csrf
                     <div class="col-12">
-                      <label for="login" class="form-label">Email or Username</label>
+                      <label for="login" class="form-label">Username</label>
                       <div class="input-group has-validation">
-                        <input type="text" name="login" class="form-control @error('login') is-invalid @enderror" id="login" required placeholder="Enter your email or username">
+                        <input type="text" name="login" class="form-control @error('login') is-invalid @enderror" id="login" required placeholder="Enter your username">
                         @error('login')
                         <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -74,9 +75,6 @@
                     </div>
                     <div class="col-12">
                       <button class="btn btn-primary w-100" type="submit">Login</button>
-                    </div>
-                    <div class="col-12 text-center">
-                      <a href="{{ route('password.request') }}">Forgot your password?</a>
                     </div>
                     <div class="col-12 text-center">
                       <p class="small mb-0">Don't have an account? <a href="{{ route('register') }}">Sign up</a></p>

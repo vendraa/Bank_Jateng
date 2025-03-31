@@ -28,6 +28,7 @@
   
   <!-- Template Main CSS File -->
   <link href="{{ asset('assets/css/style.css') }}" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 </head>
 
 <body>
@@ -43,31 +44,19 @@
       <i class="bi bi-list toggle-sidebar-btn"></i>
     </div><!-- End Logo -->
 
-
-
     <nav class="header-nav ms-auto">
       <ul class="d-flex align-items-center">
-
-
-
         <li class="nav-item dropdown pe-3">
-
           <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
-            <img src="assets/img/profile-img.jpg" alt="Profile" class="rounded-circle">
-            <span class="d-none d-md-block dropdown-toggle ps-2">K. Anderson</span>
-          </a><!-- End Profile Iamge Icon -->
-
+            <img src="{{ Auth::user()->avatar }}" alt="Profile" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">
+          </a>
           <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
             <li class="dropdown-header">
-              <h6>Kevin Anderson</h6>
-              <span>Web Designer</span>
+              <h6>{{ Auth::user()->name }}</h6>
+              <span>{{ Auth::user()->username }}</span>
             </li>
             <li>
-              <hr class="dropdown-divider">
-            </li>
-
-            <li>
-              <a class="dropdown-item d-flex align-items-center" href="users-profile.html">
+              <a class="dropdown-item d-flex align-items-center" href="{{ route('profile.edit') }}">
                 <i class="bi bi-person"></i>
                 <span>My Profile</span>
               </a>
@@ -75,23 +64,17 @@
             <li>
               <hr class="dropdown-divider">
             </li>
-
             <li>
-              <a class="dropdown-item d-flex align-items-center" href="#">
-                <i class="bi bi-box-arrow-right"></i>
-                <form action="{{ route('logout') }}" method="POST">
-                    @csrf
-                    <button type="submit" class="dropdown-item">
-                        <i class="align-middle me-1" data-feather="log-out"></i> <span>Sign Out</span>
-                    </button>
-                </form>
-                
-              </a>
+              <form action="{{ route('logout') }}" method="POST">
+                @csrf
+                <button type="submit" class="dropdown-item d-flex align-items-center">
+                  <i class="bi bi-box-arrow-right"></i>
+                  <span>Sign Out</span>
+                </button>
+              </form>
             </li>
-
-          </ul><!-- End Profile Dropdown Items -->
-        </li><!-- End Profile Nav -->
-
+          </ul>
+        </li>
       </ul>
     </nav><!-- End Icons Navigation -->
 
@@ -101,44 +84,33 @@
   <aside id="sidebar" class="sidebar">
 
     <ul class="sidebar-nav" id="sidebar-nav">
-
       <li class="nav-item">
-        <a class="nav-link collapsed" href="{{ route('dashboard') }}">
-          <i class="bi bi-grid"></i>
+        <a class="nav-link {{ request()->routeIs('dashboard') ? 'active' : 'collapsed' }}" href="{{ route('dashboard') }}">
+          <i class="bi {{ request()->routeIs('dashboard') ? 'bi-house-fill' : 'bi-house' }}"></i>
           <span>Dashboard</span>
         </a>
-      </li><!-- End Dashboard Nav -->
-
+      </li>
+      <li class="nav-heading">Nasabah</li>
       <li class="nav-item">
-        <a class="nav-link collapsed" data-bs-target="#components-nav" data-bs-toggle="collapse" href="#">
-          <i class="bi bi-menu-button-wide"></i><span>Nasabah</span><i class="bi bi-chevron-down ms-auto"></i>
+        <a class="nav-link {{ request()->routeIs('nasabah.create') ? 'active' : 'collapsed' }}" href="{{ route('nasabah.create') }}">
+          <i class="bi {{ request()->routeIs('nasabah.create') ? 'bi-person-plus-fill' : 'bi-person-plus' }}"></i>
+          <span>Data Nasabah</span>
         </a>
-        <ul id="components-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
-          <li>
-            <a href="{{ route('create') }}">
-              <i class="bi bi-circle"></i><span>Data Nasabah</span>
-            </a>
-          </li>
-          <li>
-            <a href="{{ route('index') }}">
-              <i class="bi bi-circle"></i><span>Daftar Nasabah</span>
-            </a>
-          </li>
-        </ul>
-      </li><!-- End Components Nav -->
-
+      </li>
+      
       <li class="nav-item">
-        <a class="nav-link collapsed" data-bs-target="#forms-nav" data-bs-toggle="collapse" href="#">
-          <i class="bi bi-journal-text"></i><span>PHR</span><i class="bi bi-chevron-down ms-auto"></i>
+        <a class="nav-link {{ request()->routeIs('nasabah.index') ? 'active' : 'collapsed' }}" href="{{ route('nasabah.index') }}">
+          <i class="bi {{ request()->routeIs('nasabah.index') ? 'bi-people-fill' : 'bi-people' }}"></i>
+          <span>Daftar Nasabah</span>
         </a>
-        <ul id="forms-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
-          <li>
-            <a href="{{ route('phr.index') }}">
-              <i class="bi bi-circle"></i><span>PHR Nasabah</span>
-            </a>
-          </li>
-        </ul>
-      </li><!-- End Forms Nav -->
+      </li>
+      <li class="nav-heading">PHR</li>
+      <li class="nav-item">
+        <a class="nav-link {{ request()->routeIs('phr.index') ? 'active' : 'collapsed' }}" href="{{ route('phr.index') }}">
+          <i class="bi {{ request()->routeIs('phr.index') ? 'bi-file-earmark-text-fill' : 'bi-file-earmark-text' }}"></i>
+          <span>Output PHR</span>
+        </a>
+      </li>
     </ul>
 
   </aside><!-- End Sidebar-->
@@ -156,7 +128,7 @@
   <!-- ======= Footer ======= -->
   <footer id="footer" class="footer">
     <div class="copyright">
-      &copy; Copyright <strong><span>NiceAdmin</span></strong>. All Rights Reserved
+      &copy; 2025 - All Rights Reserved.
     </div>
 
   </footer><!-- End Footer -->
@@ -175,7 +147,10 @@
 
   <!-- Template Main JS File -->
   <script src="{{ asset('assets/js/main.js') }}"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
+  @stack('scripts')
 </body>
 
 </html>

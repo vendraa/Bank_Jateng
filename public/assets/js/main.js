@@ -1,11 +1,3 @@
-/**
-* Template Name: NiceAdmin
-* Template URL: https://bootstrapmade.com/nice-admin-bootstrap-admin-html-template/
-* Updated: Apr 20 2024 with Bootstrap v5.3.3
-* Author: BootstrapMade.com
-* License: https://bootstrapmade.com/license/
-*/
-
 (function() {
   "use strict";
 
@@ -317,3 +309,187 @@
   }
 
 })();
+
+
+document.addEventListener("DOMContentLoaded", function () {
+  const avatarPreview = document.getElementById("avatar-preview");
+  const avatarInput = document.getElementById("avatar-input");
+  const deleteAvatarInput = document.getElementById("delete-avatar");
+  const deleteAvatarButton = document.querySelector("button[onclick='removeAvatar()']");
+  const form = document.getElementById("mainForm");
+  const submitButton = document.getElementById("submitButton");
+  const initialTab = "#bordered-justified-tabungan";
+
+  window.isFormSubmitting = false;
+
+  function previewAvatar(event) {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        avatarPreview.src = e.target.result;
+        deleteAvatarInput.value = "0";
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  function removeAvatar() {
+    const defaultAvatar = avatarPreview?.getAttribute("data-default-avatar");
+    if (defaultAvatar) {
+      avatarPreview.src = defaultAvatar;
+      deleteAvatarInput.value = "1";
+    }
+  }
+
+  if (avatarInput) {
+    avatarInput.addEventListener("change", previewAvatar);
+  }
+
+  if (deleteAvatarButton) {
+    deleteAvatarButton.addEventListener("click", removeAvatar);
+  }
+
+  const currentUrl = window.location.href;
+  const regexTarget = /\/phr-nasabah\/create\/\d+$/;
+
+  if (performance.navigation.type === performance.navigation.TYPE_BACK_FORWARD) {
+    sessionStorage.clear();
+    localStorage.removeItem("activeTab");
+  }
+
+  if (regexTarget.test(currentUrl)) {
+    localStorage.removeItem("activeTab");
+    sessionStorage.removeItem("tabHistory");
+
+    Object.keys(sessionStorage).forEach((key) => {
+      if (key.startsWith("phr_") || key.startsWith("data_") || key.includes("tab")) {
+        sessionStorage.removeItem(key);
+      }
+    });
+
+    function showTab(targetTab) {
+      let activeTab = document.querySelector(".nav-tabs .nav-link.active");
+      let activeContent = document.querySelector(".tab-pane.show.active");
+      let targetTabLink = document.querySelector(`button[data-bs-target="${targetTab}"]`);
+      let targetContent = document.querySelector(targetTab);
+
+      if (!targetContent) {
+        targetTab = initialTab;
+        targetTabLink = document.querySelector(`button[data-bs-target="${targetTab}"]`);
+        targetContent = document.querySelector(targetTab);
+      }
+
+      if (activeTab && activeContent) {
+        activeTab.classList.remove("active");
+        activeContent.classList.remove("show", "active");
+      }
+
+      if (targetTabLink && targetContent) {
+        targetTabLink.classList.add("active");
+        targetContent.classList.add("show", "active");
+      }
+
+      localStorage.setItem("activeTab", targetTab);
+    }
+
+    showTab(initialTab);
+
+    document.querySelectorAll(".phr-btn-next-tab").forEach(button => {
+      button.addEventListener("click", function () {
+        let activeTab = document.querySelector(".nav-tabs .nav-link.active");
+        if (activeTab) {
+          let nextTab = activeTab.parentElement.nextElementSibling;
+          if (nextTab && nextTab.querySelector(".nav-link")) {
+            let nextTabLink = nextTab.querySelector(".nav-link");
+            let targetTab = nextTabLink.getAttribute("data-bs-target");
+
+            let tabHistory = JSON.parse(sessionStorage.getItem("tabHistory")) || [];
+            let currentTab = activeTab.getAttribute("data-bs-target");
+            if (currentTab && !tabHistory.includes(currentTab)) {
+              tabHistory.push(currentTab);
+            }
+
+            sessionStorage.setItem("tabHistory", JSON.stringify(tabHistory));
+            saveFormData(document.querySelector(".tab-pane.show.active"));
+            showTab(targetTab);
+          }
+        }
+      });
+    });
+
+    document.querySelectorAll(".phr-btn-back-tab").forEach(button => {
+      button.addEventListener("click", function () {
+        let tabHistory = JSON.parse(sessionStorage.getItem("tabHistory")) || [];
+        if (tabHistory.length > 0) {
+          let previousTab = tabHistory.pop();
+          sessionStorage.setItem("tabHistory", JSON.stringify(tabHistory));
+          showTab(previousTab);
+        }
+      });
+    });
+
+    if (submitButton && form) {
+      submitButton.addEventListener("click", function (event) {
+        event.preventDefault();
+        window.isFormSubmitting = true;
+
+        sessionStorage.clear();
+        localStorage.removeItem("activeTab");
+
+        form.requestSubmit();
+      });
+
+      form.addEventListener("submit", function () {
+        window.isFormSubmitting = true;
+        sessionStorage.clear();
+        localStorage.removeItem("activeTab");
+      });
+    }
+
+    const successFlag = document.getElementById("phrSuccessFlag");
+    if (successFlag && successFlag.dataset.success === "1") {
+      sessionStorage.clear();
+      localStorage.removeItem("activeTab");
+
+      history.replaceState(null, "", window.location.href);
+    }
+
+    document.querySelectorAll('.nav-link[data-bs-toggle="tab"]').forEach(tab => {
+      tab.addEventListener("click", function () {
+        let targetTab = this.getAttribute("data-bs-target");
+        let currentTab = document.querySelector(".tab-pane.show.active");
+        saveFormData(currentTab);
+        localStorage.setItem("activeTab", targetTab);
+      });
+    });
+
+    function saveFormData(tab) {
+      let inputs = tab.querySelectorAll("input");
+      inputs.forEach(input => {
+        sessionStorage.setItem(input.name, input.value);
+      });
+    }
+
+    function loadFormData(tab) {
+      let inputs = tab.querySelectorAll("input");
+      inputs.forEach(input => {
+        let value = sessionStorage.getItem(input.name);
+        if (value) {
+          input.value = value;
+        }
+      });
+    }
+
+    document.querySelectorAll(".tab-pane").forEach(tab => {
+      loadFormData(tab);
+    });
+
+    window.addEventListener("beforeunload", function (e) {
+      if (!window.isFormSubmitting && sessionStorage.length > 0) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    });
+  }
+});

@@ -12,13 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('employee_payrolls', function (Blueprint $table) {
-            $table->foreignId('id')
+            $table->id(); 
+            $table->foreignId('nasabah_id')
                   ->constrained('nasabahs')
-                  ->onDelete('cascade')
-                  ->primary();
+                  ->onDelete('cascade');
 
             $table->string('payroll_bank');
-            $table->bigInteger('NoA');
+            $table->bigInteger('noa_pegawai');
             $table->decimal('nominal_payroll', 15, 2); 
             $table->timestamps();
 
@@ -36,7 +36,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('employee_payrolls', function (Blueprint $table) {
-            $table->dropForeign(['user_id']);
+            $table->dropForeign(['nasabah_id']); 
+            $table->dropForeign(['user_id']); 
         });
         Schema::dropIfExists('employee_payrolls');
     }

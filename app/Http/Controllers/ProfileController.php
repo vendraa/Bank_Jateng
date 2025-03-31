@@ -2,59 +2,91 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\ProfileUpdateRequest;
-use Illuminate\Http\RedirectResponse;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Redirect;
-use Illuminate\View\View;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class ProfileController extends Controller
 {
-    /**
-     * Display the user's profile form.
-     */
-    public function edit(Request $request): View
+    public function edit()
     {
-        return view('profile.edit', [
-            'user' => $request->user(),
-        ]);
+        $user = Auth::user();
+        return view('profile.edit', compact('user'));
     }
 
-    /**
-     * Update the user's profile information.
-     */
-    public function update(ProfileUpdateRequest $request): RedirectResponse
+    public function update(Request $request, $id)
     {
-        $request->user()->fill($request->validated());
+        $user = User::findOrFail($id);
+    
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'username' => 'nullable|string|max:255|unique:users,username,' . $user->id,
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', 
+        ]);
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        $oldData = $user->only(['name', 'avatar']);
+
+        if ($request->delete_avatar == "1") {
+            if (!empty($user->avatar) && Storage::disk('public')->exists($user->avatar)) {
+                Storage::disk('public')->delete($user->avatar);
+            }
+            $validated['avatar'] = null;
+        } elseif ($request->hasFile('avatar')) {
+            if (!empty($user->avatar) && Storage::disk('public')->exists($user->avatar)) {
+                Storage::disk('public')->delete($user->avatar);
+            }
+            $fileName = time() . '_' . $request->file('avatar')->getClientOriginalName();
+            $validated['avatar'] = $request->file('avatar')->storeAs('avatars', $fileName, 'public');
         }
 
-        $request->user()->save();
+        $user->update($validated);
 
-        return Redirect::route('profile.edit')->with('status', 'profile-updated');
+        return redirect()->route( 'dashboard')->with('success', 'Profile updated successfully.');
     }
 
-    /**
-     * Delete the user's account.
-     */
-    public function destroy(Request $request): RedirectResponse
+    public function updatePassword(Request $request)
     {
-        $request->validateWithBag('userDeletion', [
-            'password' => ['required', 'current_password'],
+        $request->validate([
+            'current_password' => 'required',
+            'new_password' => 'required|min:8|confirmed',
+        ], [
+            'current_password.required' => 'Current password is required.',
+            'new_password.required' => 'New password is required.',
+            'new_password.min' => 'New password must be at least 8 characters.',
+            'new_password.confirmed' => 'New password and Confirm new password must match.',
         ]);
 
-        $user = $request->user();
+        $user = Auth::user();
 
-        Auth::logout();
+        if (!Hash::check($request->current_password, $user->password)) {
+            return back()->withErrors(['current_password' => 'Current password is incorrect.']);
+        }
 
-        $user->delete();
+        if (Hash::check($request->new_password, $user->password)) {
+            return back()->withErrors(['new_password' => 'New password must be different from the current password.']);
+        }
 
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        $request->user()->update([
+            'password' => Hash::make($request->new_password),
+        ]);
 
-        return Redirect::to('/');
+        return redirect()->route('dashboard')->with('success', 'Password updated successfully.');
+    }
+
+    public function destroy()
+    {
+        $user = Auth::user();
+        $userId = $user->id;
+        $userName = $user->name;
+
+        if ($user->avatar) {
+            Storage::delete('public/' . $user->avatar);
+        }
+
+        User::where('id', $userId)->delete();
+
+        return redirect('/')->with('success', 'Profile deleted successfully.');
     }
 }

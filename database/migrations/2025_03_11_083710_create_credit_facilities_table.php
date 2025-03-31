@@ -12,10 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('credit_facilities', function (Blueprint $table) {
-            $table->foreignId('id')
+            $table->id(); 
+            $table->foreignId('nasabah_id')
                   ->constrained('nasabahs')
-                  ->onDelete('cascade')
-                  ->primary();
+                  ->onDelete('cascade');
 
             $table->string('kreditur'); 
             $table->decimal('plafond', 15, 2);
@@ -39,7 +39,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('credit_facilities', function (Blueprint $table) {
-            $table->dropForeign(['user_id']);
+            $table->dropForeign(['nasabah_id']); 
+            $table->dropForeign(['user_id']); 
         });
         Schema::dropIfExists('credit_facilities');
     }
